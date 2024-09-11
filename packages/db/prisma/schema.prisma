@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id       String    @id @default(uuid())
+  name     String
+  username String    @unique
+  email    String
+  password String
+  orders   Order[]
+  Contest  Contest[]
+}
+
+model Freelancer {
+  id         String      @id @default(uuid())
+  name       String
+  username   String      @unique
+  password   String
+  aboutUs    String
+  skills     Skill[]
+  orders     Order[]
+  submitions Submition[]
+}
+
+model Order {
+  id           String     @id @default(uuid())
+  clientId     String
+  freelancerId String
+  title        String
+  description  String
+  amount       BigInt
+  accepted     Boolean    @default(false)
+  paid         Boolean    @default(false)
+  Client       Client     @relation(fields: [clientId], references: [id])
+  Freelancer   Freelancer @relation(fields: [freelancerId], references: [id])
+}
+
+model Contest {
+  id          String      @id @default(uuid())
+  clientId    String
+  title       String
+  description String
+  submitions  Submition[]
+  client      Client      @relation(fields: [clientId], references: [id])
+}
+
+model Submition {
+  id           String     @id @default(uuid())
+  contestId    String
+  freelancerId String
+  submitionUrl String
+  freelancer   Freelancer @relation(fields: [freelancerId], references: [id])
+  contest      Contest    @relation(fields: [contestId], references: [id])
+  rating       Int        @default(0)
+
+  @@unique([contestId, freelancerId])
+}
+
+enum Skill {
+  UIUX
+  WEBDEV
+  APPDEV
+  CODM
+  FIFA
+  VIDEOEDIT
+  PHOTOGRAGHY
+}
